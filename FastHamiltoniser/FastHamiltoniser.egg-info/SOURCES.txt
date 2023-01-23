@@ -1,0 +1,6 @@
+FastHamiltoniser.cpp
+setup.py
+FastHamiltoniser.egg-info/PKG-INFO
+FastHamiltoniser.egg-info/SOURCES.txt
+FastHamiltoniser.egg-info/dependency_links.txt
+FastHamiltoniser.egg-info/top_level.txt
