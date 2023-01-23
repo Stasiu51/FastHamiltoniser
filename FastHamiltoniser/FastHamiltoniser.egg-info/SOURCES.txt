@@ -1,4 +1,4 @@
-FastHamiltoniser.cpp
+FastHamiltoniser.c
 setup.py
 FastHamiltoniser.egg-info/PKG-INFO
 FastHamiltoniser.egg-info/SOURCES.txt

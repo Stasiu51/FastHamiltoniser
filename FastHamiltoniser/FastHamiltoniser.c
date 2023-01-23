@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#include "HamiltonianObject.h"
 
 extern double* vector_add_gpu(double* a, double* b, int num_elements);
 
@@ -11,7 +12,6 @@ static PyObject* helloworld(PyObject* self, PyObject* args) {
 }
 
 static unsigned long long* memo = NULL; // static cache used to keep track of memoized values
-
 
 unsigned long long cfib(int n) {
     unsigned long long value;
@@ -104,8 +104,6 @@ static PyObject* vector_add_gpu_wrapper(PyObject* self, PyObject* args) {
     return PyArray_SimpleNewFromData(1, PyArray_DIMS(array1), PyArray_TYPE(array1), output);
 }
 
-
-
 static PyMethodDef methods[] = {
     {"helloworld", helloworld, METH_NOARGS, "A Simple Hello World Function"}, // (function name, function, arguments, doc_string)
     {"fib", fib, METH_VARARGS, "Computes the nth Fibonacci number"}, // METH_VARARGS allows for arbitrary positional arguments
@@ -113,11 +111,6 @@ static PyMethodDef methods[] = {
     {"vector_add_gpu",vector_add_gpu_wrapper,METH_VARARGS,"add two numpy float vectors on the GPU."},
     {NULL,NULL,0,NULL},
 };
-
-//static struct PyModuleDef FastHamiltoniser = {
-//    PyModuleDef_HEAD_INIT, "FastHamiltoniser", // name of the module
-//    "FastHamiltoniser", -1, methods
-//};
 
 static PyModuleDef FastHamiltoniser = {
     .m_base = PyModuleDef_HEAD_INIT,
@@ -130,5 +123,21 @@ static PyModuleDef FastHamiltoniser = {
 
 PyMODINIT_FUNC PyInit_FastHamiltoniser(void) {
     import_array();
-    return PyModule_Create(&FastHamiltoniser);
+
+    PyObject* m;
+    if (PyType_Ready(&CustomType) < 0)
+        return NULL;
+
+    m = PyModule_Create(&FastHamiltoniser);
+    if (m == NULL)
+        return NULL;
+
+    Py_INCREF(&CustomType);
+    if (PyModule_AddObject(m, "Custom", (PyObject*)&CustomType) < 0) {
+        Py_DECREF(&CustomType);
+        Py_DECREF(m);
+        return NULL;
+    }
+
+    return m;
 }
