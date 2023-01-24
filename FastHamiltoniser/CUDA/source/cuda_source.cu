@@ -11,8 +11,8 @@
 #include <cuComplex.h>
 #include <complex.h>
 
-inline cuDoubleComplex operator + (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCadd(c1, c2); }
-inline cuDoubleComplex operator - (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCsub(c1, c2); }
+__device__ inline cuDoubleComplex operator + (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCadd(c1, c2); }
+__device__ inline cuDoubleComplex operator - (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCsub(c1, c2); }
    
 /**
  * CUDA Kernel Device code
@@ -46,6 +46,10 @@ __global__ void vectorAddComplex(const cuDoubleComplex* A, const cuDoubleComplex
  * Host main routine
  */
 extern "C" {
+
+    _Dcomplex* make_identity(int dim) {
+        return NULL;
+    }
     _Dcomplex* vector_add_gpu_complex(_Dcomplex* h_A_input, _Dcomplex* h_B_input, int numElements) {
 
         cuDoubleComplex* h_A = (cuDoubleComplex*)h_A_input;

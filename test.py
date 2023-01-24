@@ -6,14 +6,22 @@ print('Running fib:')
 print(m.fib(10))
 a = np.array([1,2,3], dtype = float)
 b = np.array([2,3,4], dtype = float)
-c = np.array([2+3j,3+1j,4], dtype = complex)
-d = np.array([0+1j,2+1j,1j], dtype = complex)
 print('Running cpu vector add:')
 print(m.vector_add(a,b))
 print('Running gpu vector add:')
 print(m.vector_add_gpu(a,b))
-print('Running gpu complex vector add:')
-print(m.vector_add_gpu_complex(c,d))
 print('Making custom object')
-hm = m.HamiltonianMatrix()
+hm = m.HamiltonianMatrix(dimension = 5)
 print(hm.matrix(a))
+
+print("trying traverse")
+e = np.array([[1,2,3],[4,5,6]], dtype = float)
+m.iterate2Darray(e)
+
+
+print("trying to add permuter")
+hm.add_permuter(np.array([1,2,3],dtype = np.int16),np.array([2,3,4],dtype = np.int16),np.array([1,-1,1],dtype = complex))
+
+
+
+print("done")

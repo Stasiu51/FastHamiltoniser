@@ -128,12 +128,35 @@ static PyObject* vector_add_gpu_complex_wrapper(PyObject* self, PyObject* args) 
     return PyArray_SimpleNewFromData(1, PyArray_DIMS(array1), PyArray_TYPE(array1), output);
 }
 
+static PyObject* iterate2DArray(PyObject* self, PyObject* args) {
+    PyArrayObject* array;
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &array))
+        return NULL;
+    if (array->nd != 2 || array->descr->type_num != PyArray_DOUBLE) {
+        PyErr_SetString(PyExc_ValueError, "Array must be 2D and of type float.");
+        return NULL;
+    }
+    intptr_t d1 = array->dimensions[0];
+    intptr_t d2 = array->dimensions[1];
+    intptr_t s1 = array->strides[0];
+    intptr_t s2 = array->strides[1];
+    printf("Hello! %u,%u,%u,%u\n", d1, d2, s1, s2);
+    for (intptr_t j = 0; j < d1; j += 1) {
+        for (intptr_t i = 0; i < d2; i += 1) {
+            printf("%u,%u\n", j, i);
+            printf("%f\n", *((double*)(array->data + j*s1 + i*s2)));
+        }
+    }
+    Py_RETURN_NONE;
+}
+
 static PyMethodDef methods[] = {
     {"helloworld", helloworld, METH_NOARGS, "A Simple Hello World Function"}, // (function name, function, arguments, doc_string)
     {"fib", fib, METH_VARARGS, "Computes the nth Fibonacci number"}, // METH_VARARGS allows for arbitrary positional arguments
     {"vector_add",vector_add,METH_VARARGS,"add two numpy float vectors on the CPU."},
     {"vector_add_gpu",vector_add_gpu_wrapper,METH_VARARGS,"add two numpy float vectors on the GPU."},
     {"vector_add_gpu_complex",vector_add_gpu_complex_wrapper,METH_VARARGS,"add two numpy complex vectors on the GPU."},
+    {"iterate2Darray",iterate2DArray,METH_VARARGS,"test"},
     {NULL,NULL,0,NULL},
 };
 
