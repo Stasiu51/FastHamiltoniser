@@ -1,1 +1,1 @@
-static PyTypeObject CustomType;
+PyTypeObject HamiltonianMatrixType;

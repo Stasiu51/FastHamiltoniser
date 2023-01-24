@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="fasthamiltoniser\FastHamiltoniser.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fasthamiltoniser\HamiltonianObject.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="fasthamiltoniser\cuda\source\error_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\core\tests\data\generate_umath_validation_data.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\core\tests\examples\limited_api\limited_api.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_asimd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_asimddp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_asimdfhm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_asimdhp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512cd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512f.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_clx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_cnl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_icl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_knl.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_knm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_avx512_skx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_f16c.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_fma3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_fma4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_neon.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_neon_fp16.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_neon_vfpv4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_popcnt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_sse.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_sse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_sse41.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_sse42.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vsx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vsx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vsx3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vsx4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vx.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vxe.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_vxe2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\cpu_xop.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\extra_avx512bw_mask.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\extra_avx512dq_mask.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\extra_avx512f_reduce.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\extra_vsx4_mma.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\extra_vsx_asm.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\checks\test_flags.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\distutils\mingw\gfortran_vs2003_hack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\f2py\src\fortranobject.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="venv\lib\site-packages\numpy\f2py\tests\src\array_from_pyobj\wrapmodule.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="fasthamiltoniser\HamiltonianObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fasthamiltoniser\cuda\source\cuda_source.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="fasthamiltoniser\cuda\source\error_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\arrayobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\arrayscalars.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\experimental_dtype_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\halffloat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\ndarrayobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\ndarraytypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\noprefix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_1_7_deprecated_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_3kcompat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_cpu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_endian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_interrupt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_no_deprecated_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\npy_os.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\numpyconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\oldnumeric.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\old_defines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\ufuncobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\_neighborhood_iterator_imp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\_numpyconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\__multiarray_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\__ufunc_api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\libdivide\libdivide.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\random\bitgen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\core\include\numpy\random\distributions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="venv\lib\site-packages\numpy\f2py\src\fortranobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
