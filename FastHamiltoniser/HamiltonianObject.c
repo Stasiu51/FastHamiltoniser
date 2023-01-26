@@ -196,7 +196,7 @@ static PyObject* HamiltonianMatrix_applyToVector_gpu(PythonHamiltonianMatrix* se
 
 static PyMethodDef HamiltonianMatrix_methods[] = {
     {"matrix", HamiltonianMatrix_getMatrix, METH_NOARGS,
-     "Return the matrix form of the hamiltonian as a numpy array."},
+     "Return the matrix form of the hamiltonian as a numpy array. For performance, use 'apply' instead."},
     {"add_permuter",HamltonianMatrix_addPermuter,METH_VARARGS,
     "Add a permuter step to the hamiltonian matrix. Returns the permuter index."},
     {"set_permuter_params",HamiltonianMatrix_setPermuterState,METH_VARARGS,
