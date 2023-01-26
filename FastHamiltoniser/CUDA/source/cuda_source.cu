@@ -10,9 +10,11 @@
 #include "error_utils.h"
 #include <cuComplex.h>
 #include <complex.h>
+#include "..\..\HamiltonianMatrix.h"
 
 __device__ inline cuDoubleComplex operator + (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCadd(c1, c2); }
 __device__ inline cuDoubleComplex operator - (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCsub(c1, c2); }
+__device__ inline cuDoubleComplex operator * (cuDoubleComplex c1, cuDoubleComplex c2) { return cuCmul(c1, c2); }
    
 /**
  * CUDA Kernel Device code
@@ -40,12 +42,114 @@ __global__ void vectorAddComplex(const cuDoubleComplex* A, const cuDoubleComplex
     }
 }
 
+__global__ void permuteKernel(int permute_size, const int* targets, const int* sources, const cuDoubleComplex* relative_couplings,
+    cuDoubleComplex coefficient, cuDoubleComplex* output, const cuDoubleComplex* input)
+{
+    int i = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (i < permute_size)
+    {
+        output[targets[i]] = output[targets[i]] + (coefficient * input[sources[i]] * relative_couplings[i]);
+    }
+}
+
 
 
 /**
  * Host main routine
  */
 extern "C" {
+
+    void apply_hamiltonian_gpu(HamiltonianMatrix* ham, _Dcomplex* h_input, _Dcomplex* h_output) {
+        //On my GPU (p620) 4 streaming multiprocessors; each with upto 2048 threads that can be divided in up to 32 thread blocks -> 64 threads per block.
+        //cuDoubleComplex* h_output = (cuDoubleComplex*) malloc(ham->dim*sizeof(cuDoubleComplex));
+        //cuDoubleComplex* h_input = (cuDoubleComplex*)output_vector;
+        cudaError_t err = cudaSuccess;
+
+        size_t size = ham->dim * sizeof(cuDoubleComplex);
+
+        cuDoubleComplex* d_input = NULL;
+        err = cudaMalloc((void**)&d_input, size);
+        checkErr(err, "Allocating device vector d_input");
+
+        cuDoubleComplex* d_output = NULL;
+        err = cudaMalloc((void**)&d_output, size);
+        checkErr(err, "Allocating device vector d_output");
+
+        err = cudaMemcpy(d_input, h_input, size, cudaMemcpyHostToDevice);
+        checkErr(err, "Copy input host to device");
+
+        err = cudaMemcpy(d_output, h_output, size, cudaMemcpyHostToDevice);
+        checkErr(err, "Copy output host to device");
+
+        void** to_free = (void**)malloc(sizeof(void*) * ham->n_permuters*3);
+
+        for (int p_i = 0; p_i < ham->n_permuters; p_i++) {
+            Permuter* permuter = ham->permuters + p_i;
+            if (!permuter->active) continue;
+            cuDoubleComplex coefficient = *(cuDoubleComplex*)&permuter->coefficient;
+            
+            size_t int_array_size = permuter->size * sizeof(int);
+            size_t coeff_array_size = permuter->size * sizeof(cuDoubleComplex);
+
+            //Allocating - also keep track of pointers to free at the end
+            int* d_targets = NULL;
+            err = cudaMalloc((void**)&d_targets, int_array_size);
+            checkErr(err, "Allocating device vector d_targets");
+            to_free[3*p_i] = d_targets;
+
+            int* d_sources = NULL;
+            err = cudaMalloc((void**)&d_sources, int_array_size);
+            checkErr(err, "Allocating device vector d_sources");
+            to_free[3*p_i+1] = d_sources;
+
+            cuDoubleComplex* d_relative_coeff = NULL;
+            err = cudaMalloc((void**)&d_relative_coeff, coeff_array_size);
+            checkErr(err, "Allocating device vector d_relative_coeff");
+            to_free[3*p_i + 2] = d_relative_coeff;
+
+            //Copying
+            err = cudaMemcpy(d_targets, permuter->targets, int_array_size, cudaMemcpyHostToDevice);
+            checkErr(err, "Copy targets host to device");
+
+            err = cudaMemcpy(d_sources, permuter->sources, int_array_size, cudaMemcpyHostToDevice);
+            checkErr(err, "Copy sources host to device");
+
+            err = cudaMemcpy(d_relative_coeff, permuter->relative_couplings, coeff_array_size, cudaMemcpyHostToDevice);
+            checkErr(err, "Copy relative_coefficients host to device");
+
+            
+
+            int threadsPerBlock = 64;
+            int blocksPerGrid = (permuter->size + threadsPerBlock - 1) / threadsPerBlock;
+            printf("CUDA kernel launch with %d blocks of %d threads\n", blocksPerGrid, threadsPerBlock);
+            permuteKernel << <blocksPerGrid, threadsPerBlock >> > (
+                permuter->size,d_targets,d_sources,d_relative_coeff,coefficient, d_output,d_input);
+            err = cudaGetLastError();
+            checkErr(err, "Launch vectorAdd kernel");
+
+        }
+        err = cudaMemcpy(h_output, d_output, size, cudaMemcpyDeviceToHost);
+        checkErr(err, "Copy C device to host");
+
+
+        //Free memory
+        err = cudaFree(d_input);
+        checkErr(err, "Free device vector d_input");
+        err = cudaFree(d_output);
+        checkErr(err, "Free device vector d_output");
+        for (int p_i = 0; p_i < ham->n_permuters; p_i++) { 
+            if (ham->permuters[p_i].active) {
+                err = cudaFree(to_free[3*p_i]);
+                checkErr(err, "Free permuter targets.");
+                err = cudaFree(to_free[3*p_i + 1]);
+                checkErr(err, "Free permuter sources.");
+                err = cudaFree(to_free[3*p_i + 2]);
+                checkErr(err, "Free permuter relative_coeff.");
+            }
+        }
+        free(to_free);
+    }
 
     _Dcomplex* make_identity(int dim) {
         return NULL;
@@ -86,8 +190,7 @@ extern "C" {
         err = cudaMalloc((void**)&d_C, size);
         checkErr(err, "Allocate device vector C");
 
-        // Copy the host input vectors A and B in host memory to the device input vectors in
-        // device memory
+
         printf("Copy input data from the host memory to the CUDA device\n");
         err = cudaMemcpy(d_A, h_A, size, cudaMemcpyHostToDevice);
         checkErr(err, "Copy A host to device");

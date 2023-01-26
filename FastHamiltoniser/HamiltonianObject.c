@@ -2,87 +2,100 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <complex.h>
+#include "HamiltonianMatrix.h"
 
-typedef struct Permuters {
-    int active; //Is this map active (active=0 produces the same result as coefficient = 0)
-    int size; // the number of elements to be permuted.
-    _Dcomplex coefficient; //Coefficient of the map
-    int* sources;
-    int* targets; //mapping[2] = 3 implies that the value of the 4th element contributes to the value of the 3rd (target) element.
-    _Dcomplex* relative_couplings; // what the contributing element is multiplied by before adding to the target element.
-} Permuter;
+extern void apply_hamiltonian_gpu(HamiltonianMatrix* ham, _Dcomplex* vector, _Dcomplex* output_vector);
+
+_Dcomplex _Caddcc(_Dcomplex c1, _Dcomplex c2) { return _Cbuild(creal(c1) + creal(c2), cimag(c1) + cimag(c2)); }
 
 typedef struct {
     PyObject_HEAD
-    int dim;
-    Permuter* permuters;
-    int n_permuters;
-} HamiltonianMatrix;
+        HamiltonianMatrix* obj;
+} PythonHamiltonianMatrix;
 
 
-//static PyObject* HamiltonianMatrix_new(PyTypeObject *type, PyObject* args, PyObject* kwds)
-//{
-//    printf("hello!\n");
-//    
-//    HamiltonianMatrix* self;
-//    self = (HamiltonianMatrix*)type->tp_alloc(type, 0);
-//    if (self != NULL) {
-//        self->dim = 0;
-//    }
-//    return (PyObject*)self;
-//}
+void apply_hamiltonian_cpu(PythonHamiltonianMatrix* self, _Dcomplex* vector, _Dcomplex* output_vector) {
+    for (int p = 0; p < self->obj->n_permuters; p++) {
+
+        Permuter* permuter = self->obj->permuters + p;
+        if (!permuter->active) continue;
+        for (int i = 0; i < permuter->size; i++) {
+            output_vector[permuter->targets[i]] = _Cmulcc(_Cmulcc(permuter->coefficient, vector[permuter->sources[i]]), permuter->relative_couplings[i]);
+        }
+    }
+}
+
 
 static int
-HamiltonianMatrix_init(HamiltonianMatrix* self, PyObject* args, PyObject* kwds)
+HamiltonianMatrix_init(PythonHamiltonianMatrix* self, PyObject* args, PyObject* kwds)
 {
+    int dim;
     static char* kwlist[] = { "dimension", NULL };
+    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &dim))
+        return NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwds, "i", kwlist, &self->dim))
-        return -1;
-    self->permuters = (Permuter*)malloc(sizeof(Permuter) * 2*self->dim);
-    if (self->permuters == NULL) {
+    self->obj = (HamiltonianMatrix*)malloc(sizeof(HamiltonianMatrix));
+    if (self->obj == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to allocate hamiltonian matrix object.");
+        return NULL;
+    }
+    self->obj->dim = dim;
+    self->obj->permuters = (Permuter*)malloc(sizeof(Permuter) * 2 * self->obj->dim);
+    if (self->obj->permuters == NULL) {
         PyErr_SetString(PyExc_RuntimeError, "Failed to allocate permuter array.");
         return NULL;
     }
-    self->n_permuters = 0;
+
+    
+    
+    self->obj->n_permuters = 0;
     return 0;
 }
 
-static PyObject* HamiltonianMatrix_getMatrix(HamiltonianMatrix* self, PyObject* args)
+static PyObject* HamiltonianMatrix_getMatrix(PythonHamiltonianMatrix* self, PyObject* args)
 {
-    npy_intp dims[2] = {self->dim, self->dim};
-    PyArrayObject* ar = PyArray_Zeros(2, dims, PyArray_DescrFromType(NPY_DOUBLE), 0);
+    npy_intp dims[2] = {self->obj->dim, self->obj->dim};
+    PyArrayObject* ar = PyArray_Zeros(2, dims, PyArray_DescrFromType(NPY_COMPLEX128), 0);
     if (ar == NULL) {
         PyErr_SetString(PyExc_ValueError, "failed to make array.");
         return NULL;
     }
-    return ar;
+    _Dcomplex* c_data = (_Dcomplex*)ar->data;
+    for (int p_i = 0; p_i < self->obj->n_permuters; p_i++) {
+        Permuter* permuter = self->obj->permuters + p_i;
+        if (!permuter->active) continue;
+        for (int i = 0; i < permuter->size; i++) {
+            int index = permuter->targets[i] * ar->dimensions[0] + permuter->sources[i];
+            c_data[index] = _Caddcc(c_data[index], _Cmulcc(permuter->relative_couplings[i], permuter->coefficient));
+        }
+    }
+    return (PyObject*) ar;
 }
 
-static PyObject* HamltonianMatrix_addPermuter(HamiltonianMatrix* self, PyObject* args, PyObject* kwds) {
+static PyObject* HamltonianMatrix_addPermuter(PythonHamiltonianMatrix* self, PyObject* args, PyObject* kwds) {
     PyArrayObject* sources;
     PyArrayObject* targets;
     PyArrayObject* relative_coupling_array;
-    Py_complex* coefficient;
+    Py_complex* coefficient = &(Py_complex) { 1.0, 0 };
     int active = 1;
-    static char* kwlist[] = { "source_array","target_array","relative_coupling_array","intial_coefficient","active", NULL};
-    if (!PyArg_ParseTuple(args, "O!O!O!|Di", &PyArray_Type, &sources, &PyArray_Type, &targets, &PyArray_Type, &relative_coupling_array, &coefficient,&active))
+    static char* kwlist[] = { "target_array","source_array","relative_coupling_array","intial_coefficient","active", NULL};
+    if (!PyArg_ParseTuple(args, "O!O!O!|Di", &PyArray_Type, &targets, &PyArray_Type, &sources, &PyArray_Type, &relative_coupling_array, &coefficient,&active))
         return NULL;
-    if (sources->descr->type_num != PyArray_INT16 || sources->nd != 1) {
-        PyErr_SetString(PyExc_ValueError, "The sources array must have type int16 and have dimension 1.");
+    if (sources->descr->type_num != PyArray_INT32 || sources->nd != 1) {
+        PyErr_SetString(PyExc_ValueError, "The sources array must have type int32 and have dimension 1.");
         return NULL;
     }
     int size = sources->dimensions[0];
-    if (size < 1 || size > self->dim) {
-        PyErr_SetString(PyExc_ValueError, "The permuter must permute between 1 and %i (the matrix dimension) elements.", self->dim);
+    if (size < 1) {
+        PyErr_SetString(PyExc_ValueError, "The permuter must permute at least 1 element.");
         return NULL;
     }
-    if (targets->nd != 1 || targets->descr->type_num != PyArray_INT16 || targets->dimensions[0] != size) {
-        PyErr_SetString(PyExc_ValueError, "The targets array must be of type int16, be one-dimensional and have the same length as the sources array.", self->dim);
+    if (targets->nd != 1 || targets->descr->type_num != PyArray_INT32 || targets->dimensions[0] != size) {
+        PyErr_SetString(PyExc_ValueError, "The targets array must be of type int32, be one-dimensional and have the same length as the sources array.");
         return NULL;
     }
     if (relative_coupling_array->nd != 1 || relative_coupling_array->descr->type_num != PyArray_COMPLEX128 || relative_coupling_array->dimensions[0] != size) {
-        PyErr_SetString(PyExc_ValueError, "The relative coupling array must be of type complex, be one-dimensional and have the same length as the sources array.", self->dim);
+        PyErr_SetString(PyExc_ValueError, "The relative coupling array must be of type complex, be one-dimensional and have the same length as the sources array.");
         return NULL;
     }
     Permuter* newPermuter = malloc(sizeof(Permuter));
@@ -90,37 +103,84 @@ static PyObject* HamltonianMatrix_addPermuter(HamiltonianMatrix* self, PyObject*
         PyErr_SetString(PyExc_RuntimeError, "Failed to allocate permuter memory.");
         return NULL;
     }
+    for (int i = 0; i < size; i++) {
+        int s = ((int*)sources->data)[i];
+        int t = ((int*)targets->data)[i];
+        if (s < 0 || s >= self->obj->dim || t < 0 || t >= self->obj->dim) {
+            PyErr_SetString(PyExc_ValueError, "All entries in the source and target arrays must be between 0 and (matrix dimension) - 1.");
+            return NULL;
+        }
+    }
     newPermuter->active = active;
     newPermuter->coefficient = (_Dcomplex) { coefficient->real,coefficient->imag };
     newPermuter->sources = sources->data;
     newPermuter->targets = targets->data;
     newPermuter->relative_couplings = relative_coupling_array->data;
+    newPermuter->size = size;
     Py_INCREF(sources); Py_INCREF(targets); Py_INCREF(relative_coupling_array);
-    if (self->n_permuters == self->dim) {
-        PyErr_SetString(PyExc_RuntimeError, "Maximum number of permuters added = 2xdimension of matrix.");
+    if (self->obj->n_permuters == self->obj->dim) {
+        PyErr_SetString(PyExc_RuntimeError, "Maximum number of permuters added = 2 x dimension of matrix.");
         return NULL;
     }
-    self->permuters[self->n_permuters] = *newPermuter;
-    self->n_permuters++;
+    self->obj->permuters[self->obj->n_permuters] = *newPermuter;
+    self->obj->n_permuters++;
     Py_RETURN_NONE;
 }
 
-//static PyObject* HamiltonianMatrix_applyToVector(HamiltonianMatrix* self, PyObject* args) {
-//
-//}
+static PyObject* HamiltonianMatrix_applyToVector_cpu(PythonHamiltonianMatrix* self, PyObject* args) {
+    PyArrayObject* vector;
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &vector)) {
+        return NULL;
+    }
+    if (vector->nd != 1 || vector->descr->type_num != PyArray_COMPLEX128 || vector->dimensions[0] != self->obj->dim) {
+        PyErr_SetString(PyExc_ValueError, "Vector array must be one dimension, of type complex and of length = dimension of the matrix.");
+        return NULL;
+    }
+    _Dcomplex* output_vector = malloc(sizeof(_Dcomplex)*self->obj->dim);
+    if (output_vector == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to allocate output vector.");
+        return NULL;
+    }
+    apply_hamiltonian_cpu(self, (_Dcomplex*) vector->data, output_vector);
+    npy_intp dims[1] = { self->obj->dim };
+    return PyArray_SimpleNewFromData(1, dims, PyArray_COMPLEX128, (Py_complex*) output_vector);
+}
+
+static PyObject* HamiltonianMatrix_applyToVector_gpu(PythonHamiltonianMatrix* self, PyObject* args) {
+    PyArrayObject* vector;
+    if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &vector)) {
+        return NULL;
+    }
+    if (vector->nd != 1 || vector->descr->type_num != PyArray_COMPLEX128 || vector->dimensions[0] != self->obj->dim) {
+        PyErr_SetString(PyExc_ValueError, "Vector array must be one dimension, of type complex and of length = dimension of the matrix.");
+        return NULL;
+    }
+    _Dcomplex* output_vector = malloc(sizeof(_Dcomplex) * self->obj->dim);
+    if (output_vector == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Failed to allocate output vector.");
+        return NULL;
+    }
+    apply_hamiltonian_gpu(self->obj, (_Dcomplex*)vector->data, output_vector);
+    npy_intp dims[1] = { self->obj->dim };
+    return PyArray_SimpleNewFromData(1, dims, PyArray_COMPLEX128, (Py_complex*)output_vector);
+}
 
 static PyMethodDef HamiltonianMatrix_methods[] = {
     {"matrix", HamiltonianMatrix_getMatrix, METH_VARARGS,
      "Return the matrix form of the hamiltonian as a numpy array."},
     {"add_permuter",HamltonianMatrix_addPermuter,METH_VARARGS,
     "Add a permuter step to the hamiltonian matrix."},
+    {"apply_cpu", HamiltonianMatrix_applyToVector_cpu, METH_VARARGS,
+    "Apply the hamiltonian matrix to a complex vector on the cpu and return a modified copy."},
+    {"apply", HamiltonianMatrix_applyToVector_gpu, METH_VARARGS,
+    "Apply the hamiltonian matrix to a complex vector and return a modified copy."},
     {NULL}  /* Sentinel */
 };
 
 static PyTypeObject HamiltonianMatrixType = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "FastHamiltoniser.HamiltonianMatrix",
-    .tp_basicsize = sizeof(HamiltonianMatrix),
+    .tp_basicsize = sizeof(PythonHamiltonianMatrix),
     .tp_itemsize = 0,
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_doc = PyDoc_STR("Custom objects"),

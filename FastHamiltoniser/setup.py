@@ -13,7 +13,7 @@ else:
 
 setup(name = 'FastHamiltoniser', version = '1.0',  \
    ext_modules = [
-      Extension('FastHamiltoniser', ['FastHamiltoniser.c','HamiltonianObject.c'], 
+      Extension('FastHamiltoniser', ['FastHamiltoniser.c'], 
       include_dirs=[np.get_include(), os.path.join(CUDA_PATH, "include")],
       libraries=[".\\CUDA\\build\\cuda_lib", "cudart"],
       library_dirs = [".",os.path.join(CUDA_PATH, "lib","x64")],
